@@ -1,0 +1,79 @@
+# Catálogo Interactivo EEPSA
+
+Bienvenido al repositorio del Catálogo de Productos y Asistente Virtual (Nexi) de EEPSA.
+Este proyecto es un monorepo que contiene tanto el Frontend (React) como el Backend (Node.js/Express) y la Base de Datos (PostgreSQL), todo orquestado fácilmente mediante Docker.
+
+## 🚀 Requisitos Previos
+
+Para desarrollar y correr este proyecto en tu entorno local solo necesitas dos cosas:
+1. [Git](https://git-scm.com/) (para clonar el repositorio).
+2. [Docker Desktop](https://www.docker.com/products/docker-desktop/) (debe estar corriendo en tu computadora).
+
+No necesitas instalar Node.js ni PostgreSQL localmente, Docker se encargará de todo.
+
+## 🛠️ Cómo iniciar el proyecto por primera vez
+
+Sigue estos pasos para levantar el entorno de desarrollo:
+
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/BzSaur/CatalogoEepsa.git
+cd CatalogoEepsa
+```
+
+### 2. Configurar la carpeta de imágenes locales
+El backend necesita una carpeta de donde servir las imágenes del catálogo. Esta carpeta está ignorada en Git por su peso, así que debes crearla:
+
+- Crea una ruta de carpetas llamada `assets/img/` en la raíz del proyecto.
+- Coloca cualquier imagen de prueba dentro de `assets/img/` (por ejemplo, `prueba1.jpg`).
+- *Nota: Si no haces esto, Docker creará la carpeta automáticamente, pero estará vacía y los productos no tendrán fotos.*
+
+### 3. Levantar los contenedores
+Asegúrate de que Docker Desktop esté abierto y ejecuta:
+
+```bash
+docker-compose up -d --build
+```
+
+¡Eso es todo! Docker descargará las imágenes, instalará las dependencias (Node_modules), creará la base de datos e inyectará los datos semilla (sembrado) automáticamente.
+
+## 🌐 URLs de Acceso
+
+- **Frontend (Aplicación Web):** [http://localhost](http://localhost)
+- **Backend (API):** [http://localhost:3001](http://localhost:3001)
+- **Base de Datos:** Puerto `5432` (Usuario: `eepsa_user` | Pass: `eepsa_password` | BD: `eepsa_catalog`)
+
+## 💻 Entorno de Desarrollo y Hot-Reload
+
+El proyecto está configurado para tener una experiencia de desarrollo fluida (Hot Module Replacement activado con Polling para Windows).
+
+- Cualquier cambio que hagas en los archivos dentro de la carpeta `frontend/src/` se verá reflejado **instantáneamente** en el navegador al guardar (sin necesidad de reiniciar Docker).
+- Cualquier cambio que hagas en el código del `backend/` o en el archivo `docker-compose.yml` sí requerirá que reconstruyas el contenedor correspondiente:
+  ```bash
+  docker-compose up -d --build backend
+  ```
+
+## 📂 Estructura del Proyecto
+
+```text
+CatalogoEepsa/
+├── frontend/           # Proyecto React (Vite + Tailwind CSS + Framer Motion)
+├── backend/            # API REST (Node.js + Express + pg)
+├── db/                 # Archivos SQL (init.sql se corre automáticamente al crear la BD)
+├── assets/img/         # (Carpeta local ignorada en git para imágenes de prueba)
+├── docker-compose.yml  # Orquestador de servicios
+└── README.md           # Este archivo
+```
+
+## 🧹 Comandos Útiles
+
+**Ver los logs (errores/consolas) de todos los servicios:**
+```bash
+docker-compose logs -f
+```
+
+**Reiniciar la base de datos desde cero (Borra los volúmenes y vuelve a correr init.sql):**
+```bash
+docker-compose down -v
+docker-compose up -d --build db
+```

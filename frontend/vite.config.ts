@@ -4,4 +4,11 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    host: true, // Permite que se acceda desde fuera del contenedor
+    port: 80,
+    watch: {
+      usePolling: true, // Obligatorio para que Windows y Docker se comuniquen en tiempo real
+    }
+  }
 })

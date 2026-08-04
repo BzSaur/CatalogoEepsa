@@ -27,7 +27,7 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - /volume1/docker/eepsa/img:/app/public/img
+      - ./assets/img:/app/public/img
     depends_on:
       - db
 
@@ -39,6 +39,9 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
 

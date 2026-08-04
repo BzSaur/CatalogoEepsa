@@ -1,24 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply font-sans text-brand-ink bg-gray-50;
+    @apply font-sans text-brand-ink antialiased bg-gray-50;
+    font-family: 'Inter', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    font-family: 'Outfit', sans-serif;
   }
 }
 
 @layer utilities {
   .nexi-bg {
-    background-color: #f8fafc;
+    /* Premium mesh gradient background */
+    background-color: #f0fdfa;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(175,45%,85%,1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(175,45%,95%,1) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(170, 78%, 90%, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(190, 78%, 88%, 1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(160, 60%, 92%, 1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(180, 80%, 95%, 1) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(15,118,110,0.05)];
+  }
+
+  .premium-shadow {
+    box-shadow: 0 10px 40px -10px rgba(15, 118, 110, 0.15), 0 0 20px -5px rgba(15, 118, 110, 0.05);
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

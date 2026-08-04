@@ -6,9 +6,10 @@ export interface Product {
   sku: string;
   nombre: string;
   descripcion: string;
-  precio_estimado: string;
+  precio_estimado: number | null;
   imagen_url: string;
   etiquetas: string[];
+  optic_times_id?: string;
 }
 
 interface CartItem extends Product {
