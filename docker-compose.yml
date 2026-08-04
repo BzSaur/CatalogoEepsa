@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: eepsa-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: eepsa_user
+      POSTGRES_PASSWORD: eepsa_password
+      POSTGRES_DB: eepsa_catalog
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: eepsa-backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgres://eepsa_user:eepsa_password@db:5432/eepsa_catalog
+      - PORT=3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - /volume1/docker/eepsa/img:/app/public/img
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: eepsa-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
