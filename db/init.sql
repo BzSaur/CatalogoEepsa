@@ -9,9 +9,25 @@ CREATE TABLE IF NOT EXISTS productos (
     optic_times_id VARCHAR(50)
 );
 
--- Insertar datos de prueba según la taxonomía de OpticTimes
+CREATE TABLE IF NOT EXISTS cotizaciones (
+    id SERIAL PRIMARY KEY,
+    folio VARCHAR(50) UNIQUE NOT NULL,
+    estado VARCHAR(50) DEFAULT 'Pendiente',
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cotizacion_items (
+    id SERIAL PRIMARY KEY,
+    cotizacion_id INTEGER REFERENCES cotizaciones(id) ON DELETE CASCADE,
+    producto_id INTEGER REFERENCES productos(id),
+    cantidad INTEGER NOT NULL
+);
+
+-- Insertar datos de prueba según la taxonomía oficial de OpticTimes
 INSERT INTO productos (sku, nombre, descripcion, precio_estimado, imagen_url, etiquetas, optic_times_id) VALUES
-('CBL-ADSS-24', 'Cable ADSS 24 Hilos', 'Cable de fibra óptica monomodo ADSS de 24 hilos.', NULL, '/static/img/prueba1.jpg', '["cable", "adss", "monomodo", "24 hilos"]', '1205'),
-('CON-SC-APC', 'Conector SC/APC', 'Conector rápido SC/APC para drop.', NULL, '/static/img/prueba2.jpg', '["conector", "sc", "apc", "fast connector"]', '1207'),
-('SPL-1X8-PLC', 'Splitter PLC 1x8', 'Divisor óptico PLC 1x8 con conectores SC/APC.', NULL, '/static/img/prueba3.png', '["pasivo", "splitter", "1x8", "plc"]', '1208')
+('CBL-ADSS-24', 'Cable ADSS 24 Hilos', 'Cable de fibra óptica monomodo ADSS de 24 hilos.', 450.50, '/static/img/prueba1.jpg', '["Cable de Fira Optica"]', '1205'),
+('CBL-DROP-1', 'Cable Drop Plano 1 Hilo', 'Cable drop plano para acometida FTTH.', 12.00, '/static/img/prueba2.jpg', '["Cable de Fira Optica"]', '1206'),
+('CON-SC-APC', 'Conector Rápido SC/APC', 'Conector mecánico prepulido SC/APC para red PON.', 25.00, '/static/img/prueba3.jpg', '["Ensambles Opticos"]', '1207'),
+('HER-TENS-D', 'Tensor Dieléctrico', 'Herraje tensor dieléctrico para cable ADSS.', 85.30, '/static/img/prueba4.jpg', '["Herajes"]', '1208'),
+('NAP-16-OUT', 'Caja NAP 16 Puertos Exterior', 'Caja de distribución óptica (NAP) para exteriores con 16 puertos.', 850.00, '/static/img/prueba5.jpg', '["redes it"]', '1209')
 ON CONFLICT DO NOTHING;

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
-import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, Phone, MapPin, ExternalLink, CheckCircle, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
@@ -8,6 +8,12 @@ import type { Product } from './CartContext';
 
 const BACKEND_URL = 'http://localhost:3001';
 const API_URL = `${BACKEND_URL}/api/productos`;
+
+const WhatsAppIcon = ({ className = "w-5 h-5" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+);
 
 // --- ANIMATION VARIANTS ---
 const pageTransition: Variants = {
@@ -66,49 +72,100 @@ function TypingIndicator() {
   );
 }
 
-function Header() {
+function GlobalNavbar() {
   const { cart, setIsCartOpen } = useCart();
+  const location = useLocation();
   const cartCount = cart.reduce((acc, item) => acc + item.cantidad, 0);
+  
+  const showCart = location.pathname !== '/';
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/40 glass-panel px-4 py-3 sm:px-6">
-      <div className="flex items-center gap-3">
-        <div className="relative flex w-12 h-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3f4f6] ring-2 ring-teal-500/50 shadow-md">
-          <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
-          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
-        </div>
-        <div className="flex flex-col">
-          <span className="font-heading text-[15px] font-bold text-brand-ink leading-tight">Nexi Assistant</span>
-          <span className="flex items-center gap-1.5 text-xs font-medium text-gray-500">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Siempre en línea
-          </span>
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 px-4 py-3 sm:px-6 shadow-sm w-full">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 relative">
+        <a href="https://eepsa.com.mx/" target="_blank" rel="noopener noreferrer" className="shrink-0 transition-transform hover:scale-105 z-10">
+          <img src="/EEPSAlogo.avif" alt="EEPSA" className="h-8 sm:h-10 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
+        </a>
+
+        <div className="flex items-center gap-4 sm:gap-6 ml-auto z-10 bg-white/50 pl-2 rounded-xl">
+          {/* Contactos (Teléfono y Correo apilados, como en la imagen) */}
+          <div className="hidden md:flex flex-col items-end gap-1.5 text-[13px] font-medium text-gray-700 pr-2">
+            <a href="tel:5579916042" className="flex items-center gap-2 hover:text-teal-700 transition-colors leading-none">
+              <Phone className="w-3.5 h-3.5 text-gray-500 fill-gray-500" /> <span>(55) 79916042</span>
+            </a>
+            <a href="mailto:contacto@eepsa.com.mx" className="flex items-center gap-2 hover:text-teal-700 transition-colors leading-none">
+              <Mail className="w-3.5 h-3.5 text-gray-500 fill-gray-500" /> <span>contacto@eepsa.com.mx</span>
+            </a>
+          </div>
+
+          <div className="flex md:hidden flex-col items-end gap-1 text-[11px] font-medium text-gray-600">
+            <a href="tel:5579916042" className="flex items-center gap-1 hover:text-teal-700"><Phone className="w-3 h-3 fill-gray-500" /></a>
+            <a href="mailto:contacto@eepsa.com.mx" className="flex items-center gap-1 hover:text-teal-700"><Mail className="w-3 h-3 fill-gray-500" /></a>
+          </div>
+
+          {showCart && (
+             <>
+                <div className="h-8 w-px bg-gray-200 hidden sm:block"></div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative flex items-center justify-center w-11 h-11 rounded-full bg-teal-50 text-teal-700 transition-colors hover:bg-teal-100"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  <AnimatePresence>
+                    {cartCount > 0 && (
+                      <motion.span 
+                        initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                        className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-teal-600 text-white text-[10px] font-bold rounded-full border-2 border-white"
+                      >
+                        {cartCount}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+             </>
+          )}
         </div>
       </div>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsCartOpen(true)}
-        className="relative flex items-center justify-center w-11 h-11 rounded-full bg-white border border-gray-100 premium-shadow text-teal-700 transition-colors hover:border-teal-300"
-      >
-        <ShoppingCart className="w-5 h-5" />
-        <AnimatePresence>
-          {cartCount > 0 && (
-            <motion.span 
-              initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-              className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-teal-600 text-white text-[10px] font-bold rounded-full border-2 border-white"
-            >
-              {cartCount}
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </motion.button>
     </header>
   );
 }
 
 function CartUI() {
-  const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalEstimado } = useCart();
+  const { cart, isCartOpen, setIsCartOpen, updateQuantity, removeFromCart, totalEstimado, clearCart } = useCart();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [quoteSuccess, setQuoteSuccess] = useState(false);
+  const [quoteId, setQuoteId] = useState('');
+
+  const handleGenerateQuote = async () => {
+    if (cart.length === 0) return;
+    setIsGenerating(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/cotizaciones`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cart })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setQuoteId(data.folio);
+        setQuoteSuccess(true);
+        clearCart();
+      }
+    } catch (error) {
+      console.error('Error generating quote', error);
+    }
+    setIsGenerating(false);
+  };
+
+  const closeCart = () => {
+    setIsCartOpen(false);
+    if (quoteSuccess) {
+      setTimeout(() => {
+        setQuoteSuccess(false);
+        setQuoteId('');
+      }, 300); // Resetear estado después de la animación de cierre
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -116,7 +173,7 @@ function CartUI() {
         <div className="fixed inset-0 z-50 flex justify-end">
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-brand-ink/30 backdrop-blur-sm" onClick={() => setIsCartOpen(false)} 
+            className="absolute inset-0 bg-brand-ink/30 backdrop-blur-sm" onClick={closeCart} 
           />
           
           <motion.div 
@@ -125,11 +182,42 @@ function CartUI() {
           >
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <h2 className="text-2xl font-heading font-extrabold text-teal-800">Tu Cotización</h2>
-              <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
+              <button onClick={closeCart} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
+            {quoteSuccess ? (
+               <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center text-center">
+                  <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
+                     <CheckCircle className="w-10 h-10" /> 
+                  </div>
+                  <h3 className="text-2xl font-black font-heading text-brand-ink mb-2">¡Cotización Generada!</h3>
+                  <p className="text-gray-500 mb-6">Tu pedido ha sido registrado exitosamente con el siguiente folio:</p>
+                  
+                  <div className="bg-gray-50 border-2 border-dashed border-teal-200 rounded-2xl p-6 w-full mb-8">
+                     <span className="block text-3xl font-black text-teal-700 tracking-wider font-mono">{quoteId}</span>
+                  </div>
+
+                  <p className="text-sm font-bold text-gray-600 mb-4">Elige cómo deseas continuar con tu pedido:</p>
+                  
+                  <div className="flex flex-col gap-3 w-full">
+                     <a href={`https://wa.me/525579916042?text=Hola, quiero darle seguimiento a mi cotización con folio ${quoteId}.`} target="_blank" rel="noopener noreferrer" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
+                        <WhatsAppIcon className="w-5 h-5 fill-white" /> WhatsApp
+                     </a>
+                     <a href={`mailto:ventas@eepsa.com.mx?subject=Cotización ${quoteId}&body=Hola, quiero darle seguimiento a mi cotización con folio ${quoteId}.`} className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
+                        <Mail className="w-5 h-5" /> Enviar Correo
+                     </a>
+                     <a href="tel:5579916042" className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
+                        <Phone className="w-5 h-5" /> Hablar a Telemarketing
+                     </a>
+                     <button className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
+                        <MapPin className="w-5 h-5" /> Visitar Tienda Física
+                     </button>
+                  </div>
+               </div>
+            ) : (
+              <>
             <div className="flex-1 overflow-y-auto p-6 hide-scrollbar">
               {cart.length === 0 ? (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center mt-20 flex flex-col items-center">
@@ -174,23 +262,31 @@ function CartUI() {
             </div>
 
             <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] z-10">
+              <div className="bg-orange-50 text-orange-800 text-xs font-medium px-4 py-3 rounded-xl mb-5 flex items-start gap-2 border border-orange-100/50">
+                <span className="text-orange-500 mt-0.5">⚠️</span>
+                <p><strong>Nota importante:</strong> No se procesan pagos en línea por este medio. Los pagos se acordarán directamente con un asesor tras generar la cotización.</p>
+              </div>
               <div className="flex justify-between items-end mb-6">
                 <span className="font-medium text-gray-500">Total Estimado</span>
                 <div className="text-right">
                   <span className="text-3xl font-heading font-black text-teal-800 tracking-tight">${totalEstimado.toFixed(2)}</span>
-                  <p className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">Precio informativo</p>
+                  <p className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">Mxn / Sin IVA</p>
                 </div>
               </div>
               
               <div className="flex flex-col gap-3">
-                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-teal-600/30 transition-colors">
-                    <Phone className="w-5 h-5" /> Contactar a un Asesor
-                 </motion.button>
-                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full bg-teal-50 hover:bg-teal-100 text-teal-800 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-colors">
-                    <MapPin className="w-5 h-5" /> Visitar Tienda Física
+                 <motion.button 
+                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} 
+                   onClick={handleGenerateQuote}
+                   disabled={isGenerating || cart.length === 0}
+                   className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-teal-600/30 transition-colors"
+                 >
+                    {isGenerating ? 'Generando...' : 'Generar Cotización'}
                  </motion.button>
               </div>
             </div>
+            </>
+            )}
           </motion.div>
         </div>
       )}
@@ -205,10 +301,7 @@ function Screen1Selection() {
     <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="min-h-screen nexi-bg flex flex-col items-center justify-center p-6">
       <div className="max-w-4xl w-full">
         <div className="text-center mb-16">
-          <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring", bounce: 0.3 }} className="mb-8 flex justify-center">
-             <img src="/EEPSAlogo.avif" alt="EEPSA" className="h-16 object-contain drop-shadow-md" onError={(e) => (e.currentTarget.style.display = 'none')} />
-          </motion.div>
-          <h1 className="text-4xl md:text-5xl font-black text-brand-ink mb-5 font-heading tracking-tight leading-tight">
+          <h1 className="text-4xl md:text-5xl font-black text-brand-ink mb-5 font-heading tracking-tight leading-tight mt-8">
             Catálogo Interactivo de <br className="hidden md:block"/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-500">Equipamiento Óptico</span>
           </h1>
           <p className="text-lg font-medium text-gray-500 max-w-2xl mx-auto">Explora nuestras soluciones y herramientas para redes de fibra óptica. Selecciona tu método de navegación preferido.</p>
@@ -270,22 +363,31 @@ function Screen2AAssistant() {
     // Simular escritura de los primeros mensajes al cargar la pantalla
     const loadInitialMessages = async () => {
       await new Promise(resolve => setTimeout(resolve, 600));
-      setMessages([{ id: 1, type: 'bot', text: '¡Hola! Soy Nexi ✦ Te ayudaré a encontrar el equipo de fibra óptica ideal.' }]);
+      setMessages([{ id: 1, type: 'bot', text: '¡Hola! Soy Nexi. Te ayudaré a encontrar el equipo de fibra óptica ideal.' }]);
       
       await new Promise(resolve => setTimeout(resolve, 1200));
-      setMessages(prev => [...prev, { id: 2, type: 'bot', text: 'Para empezar, ¿qué tipo de producto estás buscando? Selecciona una categoría.' }]);
+      setMessages(prev => [...prev, { id: 2, type: 'bot', text: 'Para empezar, ¿Qué tipo de producto estás buscando? Selecciona una categoría.' }]);
       setInitialLoading(false);
     };
     loadInitialMessages();
   }, []);
 
+  const categoryMap: Record<string, string> = {
+    'Todos': '',
+    'Equipo Activo': 'equipo activo',
+    'CATV': 'catv',
+    'Cable de Fibra Óptica': 'Cable de Fira Optica',
+    'Herramientas FTTH': 'Herramientas FTTH',
+    'Herrajes': 'Herajes',
+    'Tranceptores': 'Tranceptores',
+    'Ensambles Ópticos': 'Ensambles Opticos',
+    'Medición y Fusión': 'Medición y Fusión',
+    'Kits de Fibra Óptica': 'Kits de fibra optica',
+    'Redes IT': 'redes it'
+  };
+  const categories = Object.keys(categoryMap);
+  
   const handleCategoryClick = async (category: string) => {
-    const categoryMap: Record<string, string> = {
-      'Cables': 'cable',
-      'Conectores': 'conector',
-      'Herrajes': 'herraje',
-      'Cajas NAP': 'nap'
-    };
     
     const userMsgId = Date.now();
     setMessages(prev => [...prev, { id: userMsgId, type: 'user', text: category }]);
@@ -307,15 +409,20 @@ function Screen2AAssistant() {
   };
 
   return (
-    <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="min-h-screen nexi-bg flex flex-col items-center sm:py-6 sm:px-4">
-      <div className="relative flex h-screen w-full max-w-3xl flex-col bg-white sm:h-[calc(100vh-3rem)] sm:max-h-[900px] sm:rounded-[2.5rem] sm:border sm:border-white/60 premium-shadow overflow-hidden">
-        <Header />
-        
-        <div className="p-4 bg-gray-50/80 backdrop-blur-sm border-b border-gray-100 z-20 flex items-center gap-4">
-           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-400 hover:text-brand-ink transition-colors bg-white p-2 rounded-full premium-shadow">
-             <ArrowLeft className="w-5 h-5" />
-           </motion.button>
-           <span className="font-heading font-bold text-gray-500 text-sm">Volver al inicio</span>
+    <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="flex-1 flex flex-col items-center sm:py-6 sm:px-4 bg-gray-50">
+      <div className="relative flex h-[calc(100vh-4rem)] w-full max-w-4xl flex-col bg-white sm:h-[calc(100vh-8rem)] sm:max-h-[900px] sm:rounded-[2.5rem] sm:border sm:border-gray-200 premium-shadow overflow-hidden">
+        <div className="p-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-20 flex items-center justify-between">
+           <div className="flex items-center gap-4">
+             <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-400 hover:text-brand-ink transition-colors bg-gray-50 p-2 rounded-full">
+               <ArrowLeft className="w-5 h-5" />
+             </motion.button>
+             <span className="font-heading font-bold text-gray-500 text-sm">Volver al inicio</span>
+           </div>
+           
+           <div className="flex items-center gap-3 bg-teal-50 px-4 py-2 rounded-full">
+             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+             <span className="font-bold text-teal-800 text-xs tracking-wide">Nexi Assistant</span>
+           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-8 sm:px-8 pb-32 hide-scrollbar">
@@ -345,14 +452,14 @@ function Screen2AAssistant() {
 
             {products.length === 0 && !loading && !initialLoading && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="ml-[52px] max-w-[88%] w-full">
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                  {['Cables', 'Conectores', 'Herrajes', 'Cajas NAP'].map((cat, idx) => (
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((cat, idx) => (
                     <motion.button 
                       key={cat} 
                       whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}
-                      initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 + idx * 0.1 }}
+                      initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 + (idx * 0.03) }}
                       onClick={() => handleCategoryClick(cat)} 
-                      className="rounded-2xl border-2 border-transparent bg-white p-4 text-sm font-bold text-teal-700 hover:border-teal-100 premium-shadow text-center"
+                      className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-teal-700 hover:border-teal-300 hover:bg-teal-50 transition-colors shadow-sm"
                     >
                       {cat}
                     </motion.button>
@@ -436,8 +543,8 @@ function Screen2BCatalog() {
   const filtered = products.filter(p => p.nombre.toLowerCase().includes(search.toLowerCase()) || p.descripcion.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200 sticky top-0 z-30 px-4 py-4 sm:px-6">
+    <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="flex-1 bg-gray-50 flex flex-col">
+      <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200 sticky top-[68px] z-20 px-4 py-4 sm:px-6 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 sm:gap-8">
           <div className="flex items-center gap-4 flex-1">
             <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-400 hover:text-brand-ink transition-colors bg-gray-50 p-2 rounded-full">
@@ -455,9 +562,8 @@ function Screen2BCatalog() {
                />
             </div>
           </div>
-          <Header />
         </div>
-      </header>
+      </div>
 
       <main className="flex-1 max-w-7xl mx-auto w-full p-6">
          {loading ? (
@@ -539,13 +645,18 @@ function Screen2BCatalog() {
 function App() {
   return (
     <CartProvider>
-      <AnimatePresence mode="wait">
-        <Routes>
-          <Route path="/" element={<Screen1Selection />} />
-          <Route path="/assistant" element={<Screen2AAssistant />} />
-          <Route path="/catalog" element={<Screen2BCatalog />} />
-        </Routes>
-      </AnimatePresence>
+      <div className="flex flex-col min-h-screen">
+        <GlobalNavbar />
+        <main className="flex-1 flex flex-col">
+          <AnimatePresence mode="wait">
+            <Routes>
+              <Route path="/" element={<Screen1Selection />} />
+              <Route path="/assistant" element={<Screen2AAssistant />} />
+              <Route path="/catalog" element={<Screen2BCatalog />} />
+            </Routes>
+          </AnimatePresence>
+        </main>
+      </div>
       <CartUI />
     </CartProvider>
   );
