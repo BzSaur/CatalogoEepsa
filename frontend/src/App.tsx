@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, Phone, MapPin, ExternalLink, CheckCircle, Mail, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, Phone, MapPin, ExternalLink, CheckCircle, Mail, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw, CheckCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
@@ -59,14 +59,11 @@ function SkeletonLoader() {
 
 function TypingIndicator() {
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-end gap-3">
-      <div className="relative flex w-10 h-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3f4f6] ring-1 ring-black/5 shadow-sm mb-1">
-        <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
-      </div>
-      <div className="bg-white border border-gray-100 rounded-[1.5rem] rounded-bl-sm px-5 py-4 shadow-sm flex items-center gap-1.5">
-        <motion.div className="w-2 h-2 bg-gray-300 rounded-full" animate={{ y: [0, -5, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0 }} />
-        <motion.div className="w-2 h-2 bg-gray-300 rounded-full" animate={{ y: [0, -5, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} />
-        <motion.div className="w-2 h-2 bg-gray-300 rounded-full" animate={{ y: [0, -5, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} />
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col self-start">
+      <div className="bg-white border border-gray-100 rounded-[1.2rem] rounded-tl-[4px] px-4 py-3 shadow-sm flex items-center gap-1.5 w-fit">
+        <motion.div className="w-1.5 h-1.5 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0 }} />
+        <motion.div className="w-1.5 h-1.5 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.2 }} />
+        <motion.div className="w-1.5 h-1.5 bg-gray-400 rounded-full" animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.4 }} />
       </div>
     </motion.div>
   );
@@ -423,10 +420,10 @@ function Screen2AAssistant() {
     // Simular escritura de los primeros mensajes al cargar la pantalla
     const loadInitialMessages = async () => {
       await new Promise(resolve => setTimeout(resolve, 600));
-      setMessages([{ id: 1, type: 'bot', text: '¡Hola! Soy Nexi. Te ayudaré a encontrar el equipo de fibra óptica ideal.' }]);
+      setMessages([{ id: Date.now(), type: 'bot', text: '¡Hola! Soy Nexi. Te ayudaré a encontrar el equipo de fibra óptica ideal.' }]);
       
       await new Promise(resolve => setTimeout(resolve, 1200));
-      setMessages(prev => [...prev, { id: 2, type: 'bot', text: 'Para empezar, ¿Qué tipo de producto estás buscando? Selecciona una categoría.' }]);
+      setMessages(prev => [...prev, { id: Date.now(), type: 'bot', text: 'Para empezar, ¿Qué tipo de producto estás buscando? Selecciona una categoría.' }]);
       setInitialLoading(false);
     };
     loadInitialMessages();
@@ -471,47 +468,69 @@ function Screen2AAssistant() {
   return (
     <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="flex-1 flex flex-col items-center sm:py-6 sm:px-4 bg-gray-50">
       <div className="relative flex h-[calc(100vh-4rem)] w-full max-w-4xl flex-col bg-white sm:h-[calc(100vh-8rem)] sm:max-h-[900px] sm:rounded-[2.5rem] sm:border sm:border-gray-200 premium-shadow overflow-hidden">
-        <div className="p-4 bg-white/90 backdrop-blur-md border-b border-gray-100 z-20 flex items-center justify-between">
-           <div className="flex items-center gap-4">
-             <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-400 hover:text-brand-ink transition-colors bg-gray-50 p-2 rounded-full">
-               <ArrowLeft className="w-5 h-5" />
-             </motion.button>
-             <span className="font-heading font-bold text-gray-500 text-sm">Volver al inicio</span>
-           </div>
+        <div className="p-3 bg-white/95 backdrop-blur-md border-b border-gray-100 z-20 flex items-center gap-3 shadow-sm">
+           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-500 hover:text-teal-700 transition-colors p-1.5 rounded-full ml-1">
+             <ArrowLeft className="w-5 h-5" />
+           </motion.button>
            
-           <div className="flex items-center gap-3 bg-teal-50 px-4 py-2 rounded-full">
-             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-             <span className="font-bold text-teal-800 text-xs tracking-wide">Nexi Assistant</span>
+           <div className="flex items-center gap-3 cursor-pointer group">
+             <div className="w-10 h-10 rounded-full overflow-hidden shadow-sm relative bg-[#f3f4f6]">
+                <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
+             </div>
+             <div className="flex flex-col justify-center">
+                <span className="font-bold text-brand-ink text-[15px] leading-[1.1] group-hover:text-teal-700 transition-colors">Nexi</span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                   <span className="text-teal-600 text-[12px] font-medium leading-none">en línea</span>
+                </div>
+             </div>
            </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-8 sm:px-8 pb-32 hide-scrollbar">
-          <div className="flex flex-col gap-6">
+        <div 
+          className="flex-1 overflow-y-auto px-4 py-8 sm:px-8 pb-32 hide-scrollbar relative"
+          style={{
+            backgroundColor: '#f4f7f7',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h10v10H10V10zm20 20h10v10H30V30zm40-20h10v10H70V10zm-20 40h10v10H50V50zm-40 20h10v10H10V70zm60 20h10v10H70V90z' fill='%230f766e' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+          }}
+        >
+          <div className="flex flex-col gap-2.5">
             <AnimatePresence initial={false}>
-              {messages.map((msg) => (
-                <motion.div 
-                  key={msg.id}
-                  variants={msg.type === 'bot' ? chatBubbleVariants : chatBubbleUserVariants}
-                  initial="hidden" animate="visible"
-                  className={`flex items-end gap-3 ${msg.type === 'user' ? 'flex-row-reverse' : ''}`}
-                >
-                  {msg.type === 'bot' && (
-                    <div className="relative flex w-10 h-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f3f4f6] ring-1 ring-black/5 shadow-sm mb-1">
-                      <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
+              {messages.map((msg) => {
+                const timeStr = new Date(msg.id).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return (
+                  <motion.div 
+                    key={msg.id}
+                    variants={msg.type === 'bot' ? chatBubbleVariants : chatBubbleUserVariants}
+                    initial="hidden" animate="visible"
+                    className={`flex items-end gap-2 max-w-[85%] ${msg.type === 'user' ? 'self-end flex-row-reverse' : 'self-start'}`}
+                  >
+                    {msg.type === 'bot' && (
+                      <div className="relative flex w-8 h-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-gray-100 shadow-sm mb-0.5">
+                        <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
+                      </div>
+                    )}
+                    <div className={`relative px-3.5 py-2 text-[14.5px] font-medium leading-snug shadow-sm flex flex-col min-w-[90px]
+                      ${msg.type === 'user' 
+                        ? 'bg-teal-600 text-white rounded-[1.2rem] rounded-tr-[4px]' 
+                        : 'bg-white text-brand-ink rounded-[1.2rem] rounded-tl-[4px] border border-gray-100'}`}
+                    >
+                      <span className="pb-3.5 pr-2">{msg.text}</span>
+                      <div className={`absolute bottom-1.5 right-2 flex items-center justify-end gap-1 ${msg.type === 'user' ? 'text-teal-100' : 'text-gray-400'}`}>
+                         <span className="text-[9px] font-bold opacity-90 leading-none">{timeStr}</span>
+                         {msg.type === 'user' && <CheckCheck className="w-3.5 h-3.5 text-sky-300" />}
+                      </div>
                     </div>
-                  )}
-                  <div className={`max-w-[85%] rounded-[1.5rem] px-5 py-3.5 text-[15px] font-medium leading-relaxed shadow-sm ${msg.type === 'user' ? 'bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-br-sm' : 'bg-white border border-gray-100 text-brand-ink rounded-bl-sm'}`}>
-                    {msg.text}
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
 
             {initialLoading && <TypingIndicator />}
             {loading && <SkeletonLoader />}
 
             {products.length === 0 && !loading && !initialLoading && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="ml-[52px] max-w-[88%] w-full">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="self-start max-w-[95%] w-full">
                 <div className="flex flex-wrap gap-2">
                   {categories.map((cat, idx) => (
                     <motion.button 
@@ -530,7 +549,7 @@ function Screen2AAssistant() {
 
             <AnimatePresence>
               {products.length > 0 && !loading && (
-                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="ml-[52px] w-full max-w-[88%] relative group">
+                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="self-start w-full max-w-[98%] sm:max-w-[90%] relative group">
                     {products.length > 2 && (
                       <>
                         <button onClick={() => scrollCarousel('left')} className="absolute -left-5 top-20 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
@@ -541,7 +560,7 @@ function Screen2AAssistant() {
                         </button>
                       </>
                     )}
-                    <div ref={carouselRef} className="overflow-x-auto pb-6 snap-x hide-scrollbar flex gap-4">
+                    <div ref={carouselRef} className="overflow-x-auto pb-6 pt-2 px-2 -mx-2 snap-x hide-scrollbar flex gap-4">
                        {products.map((p, idx) => (
                           <motion.div 
                             key={p.id} 
