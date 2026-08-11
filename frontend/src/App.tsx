@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, Phone, MapPin, ExternalLink, CheckCircle, Mail } from 'lucide-react';
+import { Grid, Search, ShoppingCart, Plus, Minus, X, ArrowLeft, Phone, MapPin, ExternalLink, CheckCircle, Mail, ChevronDown, AlertCircle, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
@@ -262,14 +262,14 @@ function CartUI() {
             </div>
 
             <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] z-10">
-              <div className="bg-orange-50 text-orange-800 text-xs font-medium px-4 py-3 rounded-xl mb-5 flex items-start gap-2 border border-orange-100/50">
-                <span className="text-orange-500 mt-0.5">⚠️</span>
+              <div className="bg-gray-50 text-gray-600 text-xs font-medium px-4 py-3 rounded-xl mb-5 flex items-start gap-2 border border-gray-200">
+                <AlertCircle className="w-4 h-4 text-gray-400 mt-0.5 shrink-0" />
                 <p><strong>Nota importante:</strong> No se procesan pagos en línea por este medio. Los pagos se acordarán directamente con un asesor tras generar la cotización.</p>
               </div>
               <div className="flex justify-between items-end mb-6">
                 <span className="font-medium text-gray-500">Total Estimado</span>
                 <div className="text-right">
-                  <span className="text-3xl font-heading font-black text-teal-800 tracking-tight">${totalEstimado.toFixed(2)}</span>
+                  <span className="text-3xl font-heading font-black text-teal-800 tracking-tight">${totalEstimado.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   <p className="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">Mxn / Sin IVA</p>
                 </div>
               </div>
@@ -287,6 +287,48 @@ function CartUI() {
             </div>
             </>
             )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// --- COMPONENTS ---
+function ProductModal({ product, isOpen, onClose, onAddToCart }: any) {
+  if (!isOpen || !product) return null;
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-brand-ink/40 backdrop-blur-sm" onClick={onClose} />
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-3xl p-6 md:p-8 max-w-3xl w-full shadow-2xl z-10 max-h-[90vh] overflow-y-auto">
+            <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"><X className="w-5 h-5"/></button>
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-1/2 bg-gray-50 rounded-2xl flex items-center justify-center p-6 border border-gray-100">
+                {product.imagen_url ? <img src={product.imagen_url.startsWith('http') ? product.imagen_url : `${BACKEND_URL}${product.imagen_url}`} alt={product.nombre} className="w-full h-auto max-h-[300px] object-contain mix-blend-multiply" /> : <Grid className="w-16 h-16 text-gray-300" />}
+              </div>
+              <div className="w-full md:w-1/2 flex flex-col">
+                <div className="mb-2 flex flex-wrap gap-2">
+                  {product.etiquetas && Array.isArray(product.etiquetas) && product.etiquetas.map((t: string) => (
+                    <span key={t} className="bg-teal-50 text-teal-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">{t}</span>
+                  ))}
+                </div>
+                <h2 className="text-2xl font-black font-heading text-brand-ink mb-2 leading-tight">{product.nombre}</h2>
+                <div className="text-3xl font-black text-teal-600 mb-4">${Number(product.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-sm text-gray-400 font-medium tracking-wider">MXN</span></div>
+                <p className="text-sm font-medium text-gray-500 mb-6 flex-1 leading-relaxed">{product.descripcion}</p>
+                <div className="flex flex-col gap-3 mt-auto">
+                   {product.optic_times_id && (
+                     <a href={`https://optictimes.mx/product?id=${product.optic_times_id}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-3.5 rounded-xl transition-colors">
+                       <ExternalLink className="w-5 h-5" /> Ver Ficha Técnica Oficial
+                     </a>
+                   )}
+                   <button onClick={() => { onAddToCart(product); onClose(); }} className="flex items-center justify-center gap-2 w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-teal-600/30 transition-colors">
+                     <ShoppingCart className="w-5 h-5" /> Añadir a Cotización
+                   </button>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
       )}
@@ -351,10 +393,28 @@ function Screen2AAssistant() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [messages, setMessages] = useState<{id: number, type: string, text: string}[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const initialized = useRef(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  const scrollCarousel = (direction: 'left' | 'right') => {
+    if (carouselRef.current) {
+      const scrollAmount = 320;
+      carouselRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const resetSearch = () => {
+    setProducts([]);
+    setMessages(prev => [
+      ...prev, 
+      { id: Date.now(), type: 'user', text: 'Quiero buscar otra categoría' },
+      { id: Date.now() + 1, type: 'bot', text: '¡Claro! ¿Qué otra categoría te gustaría explorar?' }
+    ]);
+  };
 
   useEffect(() => {
     if (initialized.current) return;
@@ -374,16 +434,16 @@ function Screen2AAssistant() {
 
   const categoryMap: Record<string, string> = {
     'Todos': '',
-    'Equipo Activo': 'equipo activo',
-    'CATV': 'catv',
-    'Cable de Fibra Óptica': 'Cable de Fira Optica',
+    'Equipo Activo': 'Equipo Activo',
+    'CATV': 'CATV',
+    'Cable de Fibra Óptica': 'Cable de Fibra Óptica',
     'Herramientas FTTH': 'Herramientas FTTH',
-    'Herrajes': 'Herajes',
+    'Herrajes': 'Herrajes',
     'Tranceptores': 'Tranceptores',
-    'Ensambles Ópticos': 'Ensambles Opticos',
+    'Ensambles Ópticos': 'Ensambles Ópticos',
     'Medición y Fusión': 'Medición y Fusión',
-    'Kits de Fibra Óptica': 'Kits de fibra optica',
-    'Redes IT': 'redes it'
+    'Kits de Fibra Óptica': 'Kits de Fibra Óptica',
+    'Redes e IT': 'Redes e IT'
   };
   const categories = Object.keys(categoryMap);
   
@@ -470,42 +530,56 @@ function Screen2AAssistant() {
 
             <AnimatePresence>
               {products.length > 0 && !loading && (
-                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="ml-[52px] w-full max-w-[88%] overflow-x-auto pb-6 snap-x hide-scrollbar">
-                    <div className="flex gap-4">
+                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="ml-[52px] w-full max-w-[88%] relative group">
+                    {products.length > 2 && (
+                      <>
+                        <button onClick={() => scrollCarousel('left')} className="absolute -left-5 top-20 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+                          <ChevronLeft className="w-6 h-6" />
+                        </button>
+                        <button onClick={() => scrollCarousel('right')} className="absolute -right-5 top-20 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+                          <ChevronRight className="w-6 h-6" />
+                        </button>
+                      </>
+                    )}
+                    <div ref={carouselRef} className="overflow-x-auto pb-6 snap-x hide-scrollbar flex gap-4">
                        {products.map((p, idx) => (
                           <motion.div 
                             key={p.id} 
                             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }}
                             className="snap-center shrink-0 w-64 bg-white rounded-3xl border border-gray-100 overflow-hidden premium-shadow flex flex-col group"
                           >
-                             <div className="h-40 bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden">
-                                {p.imagen_url ? <img src={p.imagen_url.startsWith('http') ? p.imagen_url : `${BACKEND_URL}${p.imagen_url}`} alt={p.nombre} className="h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700" /> : <Grid className="text-gray-300 w-10 h-10" />}
+                             <div 
+                               onClick={() => setSelectedProduct(p)} 
+                               className="cursor-pointer flex-1 flex flex-col group/inner relative"
+                             >
+                               <div className="absolute inset-0 bg-teal-600/0 group-hover/inner:bg-teal-600/5 transition-colors z-10 rounded-t-3xl" />
+                               <div className="h-40 bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden shrink-0">
+                                  {p.imagen_url ? <img src={p.imagen_url.startsWith('http') ? p.imagen_url : `${BACKEND_URL}${p.imagen_url}`} alt={p.nombre} className="h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="text-gray-300 w-10 h-10" />}
+                               </div>
+                               <div className="p-5 flex-1 flex flex-col">
+                                  <h3 className="font-bold font-heading text-brand-ink text-base mb-1.5 leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
+                                  <p className="text-[13px] font-medium text-gray-400 mb-3 line-clamp-2">{p.descripcion}</p>
+                                  <div className="text-lg font-black text-teal-600">${Number(p.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs text-gray-400 font-medium tracking-wider">MXN</span></div>
+                               </div>
                              </div>
-                             <div className="p-5 flex-1 flex flex-col">
-                                <h3 className="font-bold font-heading text-brand-ink text-base mb-1.5 leading-tight line-clamp-2">{p.nombre}</h3>
-                                <p className="text-[13px] font-medium text-gray-400 mb-4 line-clamp-2">{p.descripcion}</p>
-                                
-                                <div className="mt-auto flex flex-col gap-2">
-                                  {p.optic_times_id && (
-                                    <a 
-                                      href={`https://optictimes.mx/product?id=${p.optic_times_id}`}
-                                      target="_blank" rel="noopener noreferrer"
-                                      className="flex items-center justify-center gap-1.5 w-full bg-blue-50/50 hover:bg-blue-100/50 text-blue-600 font-bold py-2 rounded-xl text-xs transition-colors border border-blue-100"
-                                    >
-                                      <ExternalLink className="w-3.5 h-3.5" /> Ficha Técnica
-                                    </a>
-                                  )}
-                                  <motion.button 
-                                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                                    onClick={() => addToCart(p)} 
-                                    className="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold py-2.5 rounded-xl text-sm transition-colors flex justify-center items-center gap-2"
-                                  >
-                                     <Plus className="w-4 h-4" /> Agregar
-                                  </motion.button>
-                                </div>
+                             
+                             <div className="p-5 pt-0 mt-auto flex flex-col gap-2 relative z-20">
+                               <motion.button 
+                                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                                 onClick={() => addToCart(p)} 
+                                 className="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold py-2.5 rounded-xl text-sm transition-colors flex justify-center items-center gap-2"
+                               >
+                                  <Plus className="w-4 h-4" /> Agregar
+                               </motion.button>
                              </div>
                           </motion.div>
                        ))}
+                    </div>
+                    
+                    <div className="flex justify-start mt-2 mb-6">
+                      <button onClick={resetSearch} className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 font-bold py-2.5 px-5 rounded-full hover:bg-teal-50 hover:text-teal-700 transition-colors shadow-sm text-sm">
+                        <RotateCcw className="w-4 h-4" /> Buscar otra categoría
+                      </button>
                     </div>
                  </motion.div>
               )}
@@ -516,6 +590,7 @@ function Screen2AAssistant() {
         {/* Decorative fade for bottom of chat */}
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
       </div>
+      <ProductModal product={selectedProduct} isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={addToCart} />
     </motion.div>
   );
 }
@@ -524,8 +599,26 @@ function Screen2BCatalog() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(null);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>('Equipo Activo');
+
+  const catalogCategories = [
+    { name: 'Todos', sub: [] },
+    { name: 'Equipo Activo', sub: ['OLT', 'ONU/ONT', 'Mini Nodos'] },
+    { name: 'CATV', sub: ['Transmisor', 'EDFA'] },
+    { name: 'Cable de Fibra Óptica', sub: ['ADSS', 'Mini ADSS', 'Mini Figura 8', 'Drop', 'Cable Armado'] },
+    { name: 'Herramientas FTTH', sub: ['ODF', 'Cierre de Empalme', 'Cajas de Distribución (NAP)', 'Divisores & WDM'] },
+    { name: 'Herrajes', sub: ['Preformados', 'Tipo D', 'Herraje Tipo J'] },
+    { name: 'Tranceptores', sub: ['Tranceptores Ópticos', 'Convertidores de Medios'] },
+    { name: 'Ensambles Ópticos', sub: ['Jumpers', 'Conectores mecánicos', 'Pigtails', 'Acopladores'] },
+    { name: 'Medición y Fusión', sub: [] },
+    { name: 'Kits de Fibra Óptica', sub: ['Kit de Instalación FTTX'] },
+    { name: 'Redes e IT', sub: ['Switch', 'Gateway', 'AC&AP'] }
+  ];
 
   useEffect(() => {
     fetch(API_URL)
@@ -540,11 +633,29 @@ function Screen2BCatalog() {
       });
   }, []);
 
-  const filtered = products.filter(p => p.nombre.toLowerCase().includes(search.toLowerCase()) || p.descripcion.toLowerCase().includes(search.toLowerCase()));
+  const filtered = products.filter(p => {
+    const matchesSearch = p.nombre.toLowerCase().includes(search.toLowerCase()) || p.descripcion.toLowerCase().includes(search.toLowerCase());
+    
+    if (selectedCategory === 'Todos') return matchesSearch;
+
+    // Normalizar etiquetas para comparación flexible
+    const tags = Array.isArray(p.etiquetas) ? p.etiquetas.map((t: string) => t.toLowerCase().trim()) : [];
+    
+    // Check main category match
+    const matchesMain = tags.includes(selectedCategory.toLowerCase()) || 
+                        (selectedCategory === 'Cable de Fibra Óptica' && tags.includes('cable de fira optica')) ||
+                        (selectedCategory === 'Ensambles Ópticos' && tags.includes('ensambles opticos'));
+
+    if (selectedSubCategory) {
+      return matchesSearch && matchesMain && tags.includes(selectedSubCategory.toLowerCase());
+    }
+
+    return matchesSearch && matchesMain;
+  });
 
   return (
     <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit" className="flex-1 bg-gray-50 flex flex-col">
-      <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200 sticky top-[68px] z-20 px-4 py-4 sm:px-6 shadow-sm">
+      <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200 sticky top-[68px] z-30 px-4 py-4 sm:px-6 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 sm:gap-8">
           <div className="flex items-center gap-4 flex-1">
             <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => navigate('/')} className="text-gray-400 hover:text-brand-ink transition-colors bg-gray-50 p-2 rounded-full">
@@ -565,7 +676,64 @@ function Screen2BCatalog() {
         </div>
       </div>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full p-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 flex flex-col md:flex-row gap-6 lg:gap-8">
+         {/* Sidebar Categorías */}
+         <aside className="w-full md:w-64 shrink-0">
+           <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm sticky top-[150px]">
+              <ul className="space-y-1">
+                {catalogCategories.map(cat => (
+                  <li key={cat.name} className="flex flex-col">
+                    <button 
+                      onClick={() => {
+                        if (cat.name === 'Todos') {
+                          setSelectedCategory('Todos');
+                          setSelectedSubCategory(null);
+                        } else {
+                          if (expandedCategory === cat.name && cat.sub.length > 0) {
+                            setExpandedCategory(null);
+                          } else {
+                            setExpandedCategory(cat.name);
+                            setSelectedCategory(cat.name);
+                            setSelectedSubCategory(null);
+                          }
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm transition-colors ${selectedCategory === cat.name ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      {cat.name}
+                      {cat.sub.length > 0 && (
+                        <ChevronDown className={`w-4 h-4 transition-transform ${expandedCategory === cat.name ? 'rotate-180' : ''}`} />
+                      )}
+                    </button>
+                    <AnimatePresence>
+                      {cat.sub.length > 0 && expandedCategory === cat.name && (
+                        <motion.ul 
+                          initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden flex flex-col pl-6 mt-1 space-y-1"
+                        >
+                          {cat.sub.map(sub => (
+                            <li key={sub}>
+                              <button 
+                                onClick={() => {
+                                  setSelectedCategory(cat.name);
+                                  setSelectedSubCategory(sub);
+                                }}
+                                className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedSubCategory === sub ? 'text-teal-700 bg-teal-50/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                              >
+                                {sub}
+                              </button>
+                            </li>
+                          ))}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
+                  </li>
+                ))}
+              </ul>
+           </div>
+         </aside>
+
+         <div className="flex-1">
          {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
@@ -585,32 +753,41 @@ function Screen2BCatalog() {
              </div>
              
              <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <AnimatePresence>
+                <AnimatePresence mode="popLayout">
                   {filtered.map((p, idx) => (
                      <motion.div 
                         layout
-                        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.2, delay: idx * 0.05 }}
+                        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.25 }}
                         key={p.id} 
                         className="bg-white rounded-3xl border border-gray-100 premium-shadow hover:shadow-[0_20px_40px_-15px_rgba(15,118,110,0.15)] transition-all duration-300 overflow-hidden flex flex-col group"
                      >
-                        <div className="aspect-[4/3] bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
-                           {p.imagen_url ? <img src={p.imagen_url.startsWith('http') ? p.imagen_url : `${BACKEND_URL}${p.imagen_url}`} alt={p.nombre} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-700" /> : <Grid className="w-12 h-12 text-gray-200" />}
+                        <div 
+                           onClick={() => setSelectedProduct(p)}
+                           className="cursor-pointer flex-1 flex flex-col group/inner relative"
+                        >
+                           <div className="absolute inset-0 bg-teal-600/0 group-hover/inner:bg-teal-600/5 transition-colors z-10 rounded-t-3xl" />
+                           <div className="aspect-[4/3] bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden shrink-0">
+                              {p.imagen_url ? <img src={p.imagen_url.startsWith('http') ? p.imagen_url : `${BACKEND_URL}${p.imagen_url}`} alt={p.nombre} className="w-full h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="w-12 h-12 text-gray-200" />}
+                           </div>
+                           <div className="p-6 flex-1 flex flex-col pb-0">
+                              <h3 className="font-bold font-heading text-brand-ink mb-2 text-[17px] leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
+                              <p className="text-[13px] font-medium text-gray-400 mb-3 line-clamp-2">{p.descripcion}</p>
+                              <div className="text-xl font-black text-teal-600 mb-4">${Number(p.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs text-gray-400 font-medium tracking-wider">MXN</span></div>
+                           </div>
                         </div>
-                        <div className="p-6 flex-1 flex flex-col">
-                           <h3 className="font-bold font-heading text-brand-ink mb-2 text-[17px] leading-tight line-clamp-2">{p.nombre}</h3>
-                           <p className="text-[13px] font-medium text-gray-400 mb-4 line-clamp-2">{p.descripcion}</p>
-                           
+
+                        <div className="p-6 pt-4 mt-auto flex flex-col gap-4 relative z-20">
                            {p.optic_times_id && (
                              <a 
                                href={`https://optictimes.mx/product?id=${p.optic_times_id}`}
                                target="_blank" rel="noopener noreferrer"
-                               className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-bold text-xs mb-4 transition-colors"
+                               className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 font-bold text-xs transition-colors"
                              >
                                <ExternalLink className="w-3.5 h-3.5" /> Ver Ficha Técnica Oficial
                              </a>
                            )}
 
-                           <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4">
+                           <div className="flex items-center justify-between border-t border-gray-100 pt-4">
                               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Añadir a Cotización</span>
                               <motion.button 
                                 whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
@@ -637,7 +814,9 @@ function Screen2BCatalog() {
              )}
            </>
          )}
+         </div>
       </main>
+      <ProductModal product={selectedProduct} isOpen={!!selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={addToCart} />
     </motion.div>
   );
 }
