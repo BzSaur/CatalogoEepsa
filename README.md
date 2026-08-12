@@ -65,6 +65,14 @@ CatalogoEepsa/
 └── README.md           # Este archivo
 ```
 
+## ✨ Mejoras UI/UX Recientes (Versión Actual)
+
+La aplicación ha recibido una importante capa de pulido visual y de experiencia de usuario:
+- **Catálogo Fluido:** Se implementó `AnimatePresence (wait)` de Framer Motion en la cuadrícula de productos, eliminando deformaciones al filtrar categorías y ofreciendo transiciones suaves de "fade-out/fade-in".
+- **Asistente Virtual Mejorado:** Aumento de legibilidad en los mensajes de chat. Las opciones de respuestas rápidas ahora tienen un diseño resaltado (borde y fondo turquesa) que impide que se pierdan visualmente en la conversación.
+- **Carrusel de Productos (Nexi):** Las flechas de navegación del carrusel en el chat fueron re-centradas a la mitad de las tarjetas para una interacción más ergonómica.
+- **Branding en Alta Calidad:** Se integró el logotipo vectorizado de EEPSA (`LogoEepsaVectorizado.png`) tanto en la barra de navegación principal como en el Favicon (`index.html`), asegurando máxima nitidez en cualquier resolución.
+
 ## 🧹 Comandos Útiles
 
 **Ver los logs (errores/consolas) de todos los servicios:**

@@ -80,7 +80,7 @@ function GlobalNavbar() {
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 px-4 py-3 sm:px-6 shadow-sm w-full">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 relative">
         <a href="https://eepsa.com.mx/" target="_blank" rel="noopener noreferrer" className="shrink-0 transition-transform hover:scale-105 z-10">
-          <img src="/EEPSAlogo.avif" alt="EEPSA" className="h-8 sm:h-10 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
+          <img src="/LogoEepsaVectorizado.png" alt="EEPSA" className="h-8 sm:h-10 object-contain" onError={(e) => (e.currentTarget.style.display = 'none')} />
         </a>
 
         <div className="flex items-center gap-4 sm:gap-6 ml-auto z-10 bg-white/50 pl-2 rounded-xl">
@@ -510,7 +510,7 @@ function Screen2AAssistant() {
                         <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
                       </div>
                     )}
-                    <div className={`relative px-3.5 py-2 text-[14.5px] font-medium leading-snug shadow-sm flex flex-col min-w-[90px]
+                    <div className={`relative px-4 py-2.5 text-[15px] sm:text-[16px] font-medium leading-snug shadow-sm flex flex-col min-w-[90px]
                       ${msg.type === 'user' 
                         ? 'bg-teal-600 text-white rounded-[1.2rem] rounded-tr-[4px]' 
                         : 'bg-white text-brand-ink rounded-[1.2rem] rounded-tl-[4px] border border-gray-100'}`}
@@ -538,7 +538,7 @@ function Screen2AAssistant() {
                       whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.97 }}
                       initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.4 + (idx * 0.03) }}
                       onClick={() => handleCategoryClick(cat)} 
-                      className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-bold text-teal-700 hover:border-teal-300 hover:bg-teal-50 transition-colors shadow-sm"
+                      className="rounded-xl border-2 border-teal-500 bg-teal-50 px-4 py-2.5 text-[14px] sm:text-[15px] font-bold text-teal-800 hover:bg-teal-500 hover:text-white transition-all shadow-md"
                     >
                       {cat}
                     </motion.button>
@@ -552,10 +552,10 @@ function Screen2AAssistant() {
                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="self-start w-full max-w-[98%] sm:max-w-[90%] relative group">
                     {products.length > 2 && (
                       <>
-                        <button onClick={() => scrollCarousel('left')} className="absolute -left-5 top-20 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+                        <button onClick={() => scrollCarousel('left')} className="absolute -left-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
                           <ChevronLeft className="w-6 h-6" />
                         </button>
-                        <button onClick={() => scrollCarousel('right')} className="absolute -right-5 top-20 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+                        <button onClick={() => scrollCarousel('right')} className="absolute -right-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
                           <ChevronRight className="w-6 h-6" />
                         </button>
                       </>
@@ -771,12 +771,17 @@ function Screen2BCatalog() {
                <span className="text-sm font-bold text-gray-500">{filtered.length} productos encontrados</span>
              </div>
              
-             <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <AnimatePresence mode="popLayout">
+             <AnimatePresence mode="wait">
+               <motion.div 
+                 key={selectedCategory + '-' + (selectedSubCategory || 'all')}
+                 initial={{ opacity: 0, y: 15 }} 
+                 animate={{ opacity: 1, y: 0 }} 
+                 exit={{ opacity: 0, y: -15 }} 
+                 transition={{ duration: 0.25 }}
+                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+               >
                   {filtered.map((p, idx) => (
-                     <motion.div 
-                        layout
-                        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.25 }}
+                     <div 
                         key={p.id} 
                         className="bg-white rounded-3xl border border-gray-100 premium-shadow hover:shadow-[0_20px_40px_-15px_rgba(15,118,110,0.15)] transition-all duration-300 overflow-hidden flex flex-col group"
                      >
@@ -817,10 +822,10 @@ function Screen2BCatalog() {
                               </motion.button>
                            </div>
                         </div>
-                     </motion.div>
+                     </div>
                   ))}
-                </AnimatePresence>
-             </motion.div>
+               </motion.div>
+             </AnimatePresence>
 
              {filtered.length === 0 && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center mt-32 flex flex-col items-center">
