@@ -552,10 +552,10 @@ function Screen2AAssistant() {
                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="self-start w-full max-w-[98%] sm:max-w-[90%] relative group">
                     {products.length > 2 && (
                       <>
-                        <button onClick={() => scrollCarousel('left')} className="absolute -left-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+                        <button onClick={() => scrollCarousel('left')} className="absolute -left-5 top-32 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
                           <ChevronLeft className="w-6 h-6" />
                         </button>
-                        <button onClick={() => scrollCarousel('right')} className="absolute -right-5 top-1/2 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
+                        <button onClick={() => scrollCarousel('right')} className="absolute -right-5 top-32 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
                           <ChevronRight className="w-6 h-6" />
                         </button>
                       </>
