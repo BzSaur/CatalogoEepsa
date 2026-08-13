@@ -36,7 +36,7 @@ services:
     container_name: eepsa-frontend
     restart: unless-stopped
     environment:
-      - VITE_BACKEND_URL=https://catalogo.eepsa.com.mx/api
+      - VITE_BACKEND_URL=https://catalogo.eepsa.com.mx
     volumes:
       - ./frontend:/app
       - /app/node_modules
