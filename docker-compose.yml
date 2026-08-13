@@ -12,8 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
+    # Puertos eliminados para no chocar con bases de datos en Synology
 
   backend:
     build:
@@ -24,12 +23,11 @@ services:
     environment:
       - DATABASE_URL=postgres://eepsa_user:eepsa_password@db:5432/eepsa_catalog
       - PORT=3001
-    ports:
-      - "3001:3001"
     volumes:
       - ./assets/img:/app/public/img
     depends_on:
       - db
+    # Puertos eliminados, solo accesible en red interna de Docker
 
   frontend:
     build:
@@ -37,13 +35,37 @@ services:
       dockerfile: Dockerfile
     container_name: eepsa-frontend
     restart: unless-stopped
-    ports:
-      - "80:80"
+    environment:
+      - VITE_BACKEND_URL=https://catalogo.eepsa.com.mx/api
     volumes:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
       - backend
+    # Puertos eliminados (no expone el puerto 80 hacia el Synology)
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: eepsa-cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - frontend
+      - backend
+
+  github-runner:
+    image: myoung34/github-runner:latest
+    container_name: eepsa-github-runner
+    restart: unless-stopped
+    environment:
+      - REPO_URL=${GITHUB_REPO_URL}
+      - RUNNER_NAME=synology-nas-runner
+      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/opt/actions-runner/_work/CatalogoEepsa/CatalogoEepsa
 
 volumes:
   postgres_data:

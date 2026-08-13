@@ -6,7 +6,7 @@ import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
 import type { Product } from './CartContext';
 
-const BACKEND_URL = 'http://localhost:3001';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
 const API_URL = `${BACKEND_URL}/api/productos`;
 
 const WhatsAppIcon = ({ className = "w-5 h-5" }) => (

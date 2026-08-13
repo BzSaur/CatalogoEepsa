@@ -93,6 +93,37 @@ app.post('/api/cotizaciones', async (req: Request, res: Response) => {
   }
 });
 
+// Endpoint para que el SINV pueda consultar los detalles de una cotización por su folio
+app.get('/api/cotizaciones/:folio', async (req: Request, res: Response) => {
+  const { folio } = req.params;
+  try {
+    // Buscar la cotización
+    const quoteRes = await pool.query('SELECT * FROM cotizaciones WHERE folio = $1', [folio]);
+    if (quoteRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Cotización no encontrada' });
+    }
+    const quote = quoteRes.rows[0];
+
+    // Buscar los items con la información del producto
+    const itemsRes = await pool.query(
+      `SELECT ci.cantidad, p.* 
+       FROM cotizacion_items ci 
+       JOIN productos p ON ci.producto_id = p.id 
+       WHERE ci.cotizacion_id = $1`,
+      [quote.id]
+    );
+
+    res.json({
+      success: true,
+      cotizacion: quote,
+      items: itemsRes.rows
+    });
+  } catch (error) {
+    console.error('Error fetching quote:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Backend listening on port ${port}`);
 });
