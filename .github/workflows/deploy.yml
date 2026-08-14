@@ -15,4 +15,6 @@ jobs:
 
       - name: Deploy with Docker Compose
         run: |
-          docker-compose -p catalogoeepsa up -d --build frontend backend db
+          PROJECT_NAME=$(docker inspect -f '{{ index .Config.Labels "com.docker.compose.project" }}' eepsa-db)
+          echo "Deploying to project: $PROJECT_NAME"
+          docker-compose -p $PROJECT_NAME up -d --build frontend backend db
