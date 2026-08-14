@@ -3,5 +3,4 @@ dist/
 .env
 .DS_Store
 *.log
-
-.env
+docker-compose.override.yml

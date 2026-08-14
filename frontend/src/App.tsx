@@ -386,31 +386,41 @@ function Screen1Selection() {
   );
 }
 
+type ChatMessage = {
+  id: number;
+  type: 'user' | 'bot';
+  text: string;
+  products?: Product[];
+  icon?: 'success';
+  productImage?: string;
+};
+
 function Screen2AAssistant() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const [messages, setMessages] = useState<{id: number, type: string, text: string}[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [waitingForCategory, setWaitingForCategory] = useState(false);
   const initialized = useRef(false);
-  const carouselRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollCarousel = (direction: 'left' | 'right') => {
-    if (carouselRef.current) {
-      const scrollAmount = 320;
-      carouselRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
-    }
-  };
+  // Auto-scroll to bottom with delay to wait for animations
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [messages, loading, initialLoading, waitingForCategory]);
 
   const resetSearch = () => {
-    setProducts([]);
     setMessages(prev => [
       ...prev, 
       { id: Date.now(), type: 'user', text: 'Quiero buscar otra categoría' },
       { id: Date.now() + 1, type: 'bot', text: '¡Claro! ¿Qué otra categoría te gustaría explorar?' }
     ]);
+    setWaitingForCategory(true);
   };
 
   useEffect(() => {
@@ -425,6 +435,7 @@ function Screen2AAssistant() {
       await new Promise(resolve => setTimeout(resolve, 1200));
       setMessages(prev => [...prev, { id: Date.now(), type: 'bot', text: 'Para empezar, ¿Qué tipo de producto estás buscando? Selecciona una categoría.' }]);
       setInitialLoading(false);
+      setWaitingForCategory(true);
     };
     loadInitialMessages();
   }, []);
@@ -445,7 +456,7 @@ function Screen2AAssistant() {
   const categories = Object.keys(categoryMap);
   
   const handleCategoryClick = async (category: string) => {
-    
+    setWaitingForCategory(false);
     const userMsgId = Date.now();
     setMessages(prev => [...prev, { id: userMsgId, type: 'user', text: category }]);
     setLoading(true);
@@ -456,13 +467,31 @@ function Screen2AAssistant() {
     try {
       const res = await fetch(`${API_URL}?tags=${categoryMap[category]}`);
       const data = await res.json();
-      setProducts(data);
       const botMsgId = Date.now() + 1;
-      setMessages(prev => [...prev, { id: botMsgId, type: 'bot', text: `¡Excelente! Encontré estas opciones para "${category}".` }]);
+      setMessages(prev => [...prev, { id: botMsgId, type: 'bot', text: `¡Excelente! Encontré estas opciones para "${category}".`, products: data }]);
     } catch (e) {
       setMessages(prev => [...prev, { id: Date.now() + 1, type: 'bot', text: 'Uy, tuvimos un problema de conexión. ¿Intentamos de nuevo?' }]);
+      setWaitingForCategory(true);
     }
     setLoading(false);
+  };
+
+  const handleAddToCartInChat = (p: Product) => {
+    addToCart(p);
+    setMessages(prev => [
+      ...prev,
+      { id: Date.now(), type: 'bot', text: `He agregado "${p.nombre}" a tu cotización.`, icon: 'success', productImage: p.imagen_url }
+    ]);
+  };
+
+  const scrollCarousel = (containerId: string, direction: 'left' | 'right') => {
+    const container = document.getElementById(containerId);
+    if (container) {
+      // Calcular ancho de carta visible
+      const cardWidth = container.querySelector('.snap-center')?.clientWidth || 320;
+      const scrollAmount = cardWidth + 16; // ancho + gap
+      container.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -488,7 +517,7 @@ function Screen2AAssistant() {
         </div>
 
         <div 
-          className="flex-1 overflow-y-auto px-4 py-8 sm:px-8 pb-32 hide-scrollbar relative"
+          className="flex-1 overflow-y-auto px-4 py-8 sm:px-8 custom-scrollbar relative scroll-smooth"
           style={{
             backgroundColor: '#f4f7f7',
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10h10v10H10V10zm20 20h10v10H30V30zm40-20h10v10H70V10zm-20 40h10v10H50V50zm-40 20h10v10H10V70zm60 20h10v10H70V90z' fill='%230f766e' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E")`,
@@ -496,41 +525,109 @@ function Screen2AAssistant() {
         >
           <div className="flex flex-col gap-2.5">
             <AnimatePresence initial={false}>
-              {messages.map((msg) => {
+              {messages.map((msg, idx) => {
                 const timeStr = new Date(msg.id).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 return (
-                  <motion.div 
-                    key={msg.id}
-                    variants={msg.type === 'bot' ? chatBubbleVariants : chatBubbleUserVariants}
-                    initial="hidden" animate="visible"
-                    className={`flex items-end gap-2 max-w-[85%] ${msg.type === 'user' ? 'self-end flex-row-reverse' : 'self-start'}`}
-                  >
-                    {msg.type === 'bot' && (
-                      <div className="relative flex w-8 h-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-gray-100 shadow-sm mb-0.5">
-                        <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
-                      </div>
-                    )}
-                    <div className={`relative px-4 py-2.5 text-[15px] sm:text-[16px] font-medium leading-snug shadow-sm flex flex-col min-w-[90px]
-                      ${msg.type === 'user' 
-                        ? 'bg-teal-600 text-white rounded-[1.2rem] rounded-tr-[4px]' 
-                        : 'bg-white text-brand-ink rounded-[1.2rem] rounded-tl-[4px] border border-gray-100'}`}
+                  <div key={msg.id} className="flex flex-col w-full">
+                    <motion.div 
+                      variants={msg.type === 'bot' ? chatBubbleVariants : chatBubbleUserVariants}
+                      initial="hidden" animate="visible"
+                      className={`flex items-end gap-2 max-w-[85%] ${msg.type === 'user' ? 'self-end flex-row-reverse' : 'self-start'}`}
                     >
-                      <span className="pb-3.5 pr-2">{msg.text}</span>
-                      <div className={`absolute bottom-1.5 right-2 flex items-center justify-end gap-1 ${msg.type === 'user' ? 'text-teal-100' : 'text-gray-400'}`}>
-                         <span className="text-[9px] font-bold opacity-90 leading-none">{timeStr}</span>
-                         {msg.type === 'user' && <CheckCheck className="w-3.5 h-3.5 text-sky-300" />}
+                      {msg.type === 'bot' && (
+                        <div className="relative flex w-8 h-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-gray-100 shadow-sm mb-0.5">
+                          <img src="/nexi.png" alt="Nexi" className="w-full h-full object-cover scale-110" />
+                        </div>
+                      )}
+                      <div className={`relative px-4 py-2.5 text-[15px] sm:text-[16px] font-medium leading-snug shadow-sm flex flex-col min-w-[90px]
+                        ${msg.type === 'user' 
+                          ? 'bg-teal-600 text-white rounded-[1.2rem] rounded-tr-[4px]' 
+                          : 'bg-white text-brand-ink rounded-[1.2rem] rounded-tl-[4px] border border-gray-100'}`}
+                      >
+                        {msg.productImage && (
+                          <div className="w-full sm:min-w-[200px] h-28 sm:h-32 bg-gray-50/80 rounded-xl mb-2 overflow-hidden flex items-center justify-center p-2 border border-gray-100/50">
+                             <img src={msg.productImage.startsWith('http') ? msg.productImage : `${BACKEND_URL}${msg.productImage}`} className="h-full object-contain mix-blend-multiply" alt="Producto agregado" />
+                          </div>
+                        )}
+                        <div className="flex items-start gap-2">
+                          {msg.icon === 'success' && <CheckCircle className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />}
+                          <span className="pb-3.5 pr-2">{msg.text}</span>
+                        </div>
+                        <div className={`absolute bottom-1.5 right-2 flex items-center justify-end gap-1 ${msg.type === 'user' ? 'text-teal-100' : 'text-gray-400'}`}>
+                           <span className="text-[9px] font-bold opacity-90 leading-none">{timeStr}</span>
+                           {msg.type === 'user' && <CheckCheck className="w-3.5 h-3.5 text-sky-300" />}
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                    
+                    {/* Render Products Inline if present */}
+                    {msg.products && msg.products.length > 0 && (
+                      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="self-start w-full relative group mt-4">
+                        {msg.products.length > 3 && (
+                          <>
+                            <button onClick={() => scrollCarousel(`carousel-${msg.id}`, 'left')} className="absolute left-2 top-32 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 hidden sm:block">
+                              <ChevronLeft className="w-6 h-6" />
+                            </button>
+                            <button onClick={() => scrollCarousel(`carousel-${msg.id}`, 'right')} className="absolute right-2 top-32 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 hidden sm:block">
+                              <ChevronRight className="w-6 h-6" />
+                            </button>
+                          </>
+                        )}
+                        <div id={`carousel-${msg.id}`} className="overflow-x-auto pb-4 pt-2 snap-x custom-scrollbar flex gap-3 sm:gap-4 w-full">
+                           {msg.products.map((p, pIdx) => (
+                              <motion.div 
+                                key={p.id} 
+                                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: pIdx * 0.1 }}
+                                className="snap-center shrink-0 w-[80%] sm:w-[calc(33.333%-0.75rem)] bg-white rounded-[1.25rem] border border-gray-100 overflow-hidden premium-shadow flex flex-col group/card"
+                              >
+                                 <div 
+                                   onClick={() => setSelectedProduct(p)} 
+                                   className="cursor-pointer flex-1 flex flex-col group/inner relative"
+                                 >
+                                   <div className="absolute inset-0 bg-teal-600/0 group-hover/inner:bg-teal-600/5 transition-colors z-10 rounded-t-[1.25rem]" />
+                                   <div className="h-28 sm:h-32 bg-gray-50 flex items-center justify-center p-3 relative overflow-hidden shrink-0">
+                                      {p.imagen_url ? <img src={p.imagen_url.startsWith('http') ? p.imagen_url : `${BACKEND_URL}${p.imagen_url}`} alt={p.nombre} className="h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="text-gray-300 w-10 h-10" />}
+                                   </div>
+                                   <div className="p-3 sm:p-4 flex-1 flex flex-col">
+                                      <h3 className="font-bold font-heading text-brand-ink text-[13px] sm:text-[14px] mb-1 leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
+                                      <p className="text-[11px] sm:text-[12px] font-medium text-gray-400 mb-2 line-clamp-2 leading-snug">{p.descripcion}</p>
+                                      <div className="text-[15px] sm:text-base font-black text-teal-600 mt-auto">${Number(p.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wider">MXN</span></div>
+                                   </div>
+                                 </div>
+                                 
+                                 <div className="p-3 sm:p-4 pt-0 mt-auto flex flex-col gap-2 relative z-20">
+                                   <motion.button 
+                                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                                     onClick={() => handleAddToCartInChat(p)} 
+                                     className="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold py-2 rounded-lg text-[12px] sm:text-[13px] transition-colors flex justify-center items-center gap-1.5"
+                                   >
+                                      <Plus className="w-3.5 h-3.5" /> Agregar
+                                   </motion.button>
+                                 </div>
+                              </motion.div>
+                           ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
                 );
               })}
             </AnimatePresence>
+            
+            {/* Action Buttons at the bottom of the chat */}
+            {!loading && !waitingForCategory && messages.length > 2 && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-start mt-4 mb-6">
+                <button onClick={resetSearch} className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 font-bold py-2.5 px-5 rounded-full hover:bg-teal-50 hover:text-teal-700 transition-colors shadow-sm text-sm ml-2 sm:ml-10 premium-shadow">
+                  <RotateCcw className="w-4 h-4" /> Buscar otra categoría
+                </button>
+              </motion.div>
+            )}
 
             {initialLoading && <TypingIndicator />}
             {loading && <SkeletonLoader />}
 
-            {products.length === 0 && !loading && !initialLoading && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="self-start max-w-[95%] w-full">
+            {waitingForCategory && !loading && !initialLoading && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="self-start max-w-[95%] w-full mt-2 ml-0 sm:ml-10">
                 <div className="flex flex-wrap gap-2">
                   {categories.map((cat, idx) => (
                     <motion.button 
@@ -546,63 +643,9 @@ function Screen2AAssistant() {
                 </div>
               </motion.div>
             )}
-
-            <AnimatePresence>
-              {products.length > 0 && !loading && (
-                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="self-start w-full max-w-[98%] sm:max-w-[90%] relative group">
-                    {products.length > 2 && (
-                      <>
-                        <button onClick={() => scrollCarousel('left')} className="absolute -left-5 top-32 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
-                          <ChevronLeft className="w-6 h-6" />
-                        </button>
-                        <button onClick={() => scrollCarousel('right')} className="absolute -right-5 top-32 -translate-y-1/2 z-20 bg-white/90 backdrop-blur-md border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full p-2.5 text-brand-ink hover:text-teal-600 hover:scale-110 transition-all opacity-0 group-hover:opacity-100">
-                          <ChevronRight className="w-6 h-6" />
-                        </button>
-                      </>
-                    )}
-                    <div ref={carouselRef} className="overflow-x-auto pb-6 pt-2 px-2 -mx-2 snap-x hide-scrollbar flex gap-4">
-                       {products.map((p, idx) => (
-                          <motion.div 
-                            key={p.id} 
-                            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }}
-                            className="snap-center shrink-0 w-64 bg-white rounded-3xl border border-gray-100 overflow-hidden premium-shadow flex flex-col group"
-                          >
-                             <div 
-                               onClick={() => setSelectedProduct(p)} 
-                               className="cursor-pointer flex-1 flex flex-col group/inner relative"
-                             >
-                               <div className="absolute inset-0 bg-teal-600/0 group-hover/inner:bg-teal-600/5 transition-colors z-10 rounded-t-3xl" />
-                               <div className="h-40 bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden shrink-0">
-                                  {p.imagen_url ? <img src={p.imagen_url.startsWith('http') ? p.imagen_url : `${BACKEND_URL}${p.imagen_url}`} alt={p.nombre} className="h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="text-gray-300 w-10 h-10" />}
-                               </div>
-                               <div className="p-5 flex-1 flex flex-col">
-                                  <h3 className="font-bold font-heading text-brand-ink text-base mb-1.5 leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
-                                  <p className="text-[13px] font-medium text-gray-400 mb-3 line-clamp-2">{p.descripcion}</p>
-                                  <div className="text-lg font-black text-teal-600">${Number(p.precio_estimado).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-xs text-gray-400 font-medium tracking-wider">MXN</span></div>
-                               </div>
-                             </div>
-                             
-                             <div className="p-5 pt-0 mt-auto flex flex-col gap-2 relative z-20">
-                               <motion.button 
-                                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                                 onClick={() => addToCart(p)} 
-                                 className="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold py-2.5 rounded-xl text-sm transition-colors flex justify-center items-center gap-2"
-                               >
-                                  <Plus className="w-4 h-4" /> Agregar
-                               </motion.button>
-                             </div>
-                          </motion.div>
-                       ))}
-                    </div>
-                    
-                    <div className="flex justify-start mt-2 mb-6">
-                      <button onClick={resetSearch} className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 font-bold py-2.5 px-5 rounded-full hover:bg-teal-50 hover:text-teal-700 transition-colors shadow-sm text-sm">
-                        <RotateCcw className="w-4 h-4" /> Buscar otra categoría
-                      </button>
-                    </div>
-                 </motion.div>
-              )}
-            </AnimatePresence>
+            
+            {/* Element to scroll to bottom */}
+            <div ref={messagesEndRef} className="h-20 shrink-0 w-full" />
           </div>
         </div>
         

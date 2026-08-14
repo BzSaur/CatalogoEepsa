@@ -8,6 +8,9 @@ export default defineConfig({
     host: true, // Permite que se acceda desde fuera del contenedor
     allowedHosts: ['catalogo.eepsa.com.mx'],
     port: 80,
+    hmr: {
+      clientPort: 80,
+    },
     watch: {
       usePolling: true, // Obligatorio para que Windows y Docker se comuniquen en tiempo real
     },

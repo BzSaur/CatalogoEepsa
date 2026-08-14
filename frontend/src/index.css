@@ -37,11 +37,22 @@
     box-shadow: 0 10px 40px -10px rgba(15, 118, 110, 0.15), 0 0 20px -5px rgba(15, 118, 110, 0.05);
   }
   
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
   }
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(15, 118, 110, 0.2);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(15, 118, 110, 0.4);
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15, 118, 110, 0.2) transparent;
   }
 }
