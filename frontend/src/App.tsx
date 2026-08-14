@@ -6,8 +6,7 @@ import type { Variants } from 'framer-motion';
 import { CartProvider, useCart } from './CartContext';
 import type { Product } from './CartContext';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-const API_URL = `${BACKEND_URL}/api/productos`;
+const API_URL = '/api/productos';
 
 const WhatsAppIcon = ({ className = "w-5 h-5" }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -546,7 +545,7 @@ function Screen2AAssistant() {
                       >
                         {msg.productImage && (
                           <div className="w-full sm:min-w-[200px] h-28 sm:h-32 bg-gray-50/80 rounded-xl mb-2 overflow-hidden flex items-center justify-center p-2 border border-gray-100/50">
-                             <img src={msg.productImage.startsWith('http') ? msg.productImage : `${BACKEND_URL}${msg.productImage}`} className="h-full object-contain mix-blend-multiply" alt="Producto agregado" />
+                             <img src={msg.productImage} className="h-full object-contain mix-blend-multiply" alt="Producto agregado" />
                           </div>
                         )}
                         <div className="flex items-start gap-2">
@@ -586,7 +585,7 @@ function Screen2AAssistant() {
                                  >
                                    <div className="absolute inset-0 bg-teal-600/0 group-hover/inner:bg-teal-600/5 transition-colors z-10 rounded-t-[1.25rem]" />
                                    <div className="h-28 sm:h-32 bg-gray-50 flex items-center justify-center p-3 relative overflow-hidden shrink-0">
-                                      {p.imagen_url ? <img src={p.imagen_url.startsWith('http') ? p.imagen_url : `${BACKEND_URL}${p.imagen_url}`} alt={p.nombre} className="h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="text-gray-300 w-10 h-10" />}
+                                      {p.imagen_url ? <img src={p.imagen_url} alt={p.nombre} className="h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="text-gray-300 w-10 h-10" />}
                                    </div>
                                    <div className="p-3 sm:p-4 flex-1 flex flex-col">
                                       <h3 className="font-bold font-heading text-brand-ink text-[13px] sm:text-[14px] mb-1 leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>
