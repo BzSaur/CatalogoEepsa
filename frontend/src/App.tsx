@@ -136,7 +136,7 @@ function CartUI() {
     if (cart.length === 0) return;
     setIsGenerating(true);
     try {
-      const res = await fetch(`${BACKEND_URL}/api/cotizaciones`, {
+      const res = await fetch('/api/cotizaciones', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cart })
@@ -233,7 +233,7 @@ function CartUI() {
                       >
                         <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden">
                           {item.imagen_url ? (
-                             <img src={item.imagen_url.startsWith('http') ? item.imagen_url : `${BACKEND_URL}${item.imagen_url}`} alt={item.nombre} className="w-full h-full object-contain mix-blend-multiply p-1" />
+                             <img src={item.imagen_url} alt={item.nombre} className="w-full h-full object-contain mix-blend-multiply p-1" />
                           ) : (
                              <Grid className="w-6 h-6 text-gray-300" />
                           )}
@@ -302,7 +302,7 @@ function ProductModal({ product, isOpen, onClose, onAddToCart }: any) {
             <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"><X className="w-5 h-5"/></button>
             <div className="flex flex-col md:flex-row gap-6">
               <div className="w-full md:w-1/2 bg-gray-50 rounded-2xl flex items-center justify-center p-6 border border-gray-100">
-                {product.imagen_url ? <img src={product.imagen_url.startsWith('http') ? product.imagen_url : `${BACKEND_URL}${product.imagen_url}`} alt={product.nombre} className="w-full h-auto max-h-[300px] object-contain mix-blend-multiply" /> : <Grid className="w-16 h-16 text-gray-300" />}
+                {product.imagen_url ? <img src={product.imagen_url} alt={product.nombre} className="w-full h-auto max-h-[300px] object-contain mix-blend-multiply" /> : <Grid className="w-16 h-16 text-gray-300" />}
               </div>
               <div className="w-full md:w-1/2 flex flex-col">
                 <div className="mb-2 flex flex-wrap gap-2">
@@ -833,7 +833,7 @@ function Screen2BCatalog() {
                         >
                            <div className="absolute inset-0 bg-teal-600/0 group-hover/inner:bg-teal-600/5 transition-colors z-10 rounded-t-3xl" />
                            <div className="aspect-[4/3] bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden shrink-0">
-                              {p.imagen_url ? <img src={p.imagen_url.startsWith('http') ? p.imagen_url : `${BACKEND_URL}${p.imagen_url}`} alt={p.nombre} className="w-full h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="w-12 h-12 text-gray-200" />}
+                              {p.imagen_url ? <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-contain mix-blend-multiply group-hover/inner:scale-110 transition-transform duration-700" /> : <Grid className="w-12 h-12 text-gray-200" />}
                            </div>
                            <div className="p-6 flex-1 flex flex-col pb-0">
                               <h3 className="font-bold font-heading text-brand-ink mb-2 text-[17px] leading-tight line-clamp-2 group-hover/inner:text-teal-700 transition-colors">{p.nombre}</h3>

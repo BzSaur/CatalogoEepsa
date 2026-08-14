@@ -9,7 +9,7 @@ export default defineConfig({
     allowedHosts: ['catalogo.eepsa.com.mx'],
     port: 80,
     hmr: {
-      clientPort: 80,
+      clientPort: 443,
     },
     watch: {
       usePolling: true, // Obligatorio para que Windows y Docker se comuniquen en tiempo real
