@@ -10,6 +10,12 @@ export default defineConfig({
     port: 80,
     watch: {
       usePolling: true, // Obligatorio para que Windows y Docker se comuniquen en tiempo real
+    },
+    proxy: {
+      '/api': {
+        target: 'http://backend:3001',
+        changeOrigin: true,
+      }
     }
   }
 })
