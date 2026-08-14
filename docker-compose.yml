@@ -37,9 +37,6 @@ services:
     restart: unless-stopped
     environment:
       - VITE_BACKEND_URL=https://catalogo.eepsa.com.mx
-    volumes:
-      - ${HOST_PATH:-.}/frontend:/app
-      - /app/node_modules
     depends_on:
       - backend
     # Puertos eliminados (no expone el puerto 80 hacia el Synology)
