@@ -15,6 +15,15 @@ jobs:
 
       - name: Deploy with Docker Compose
         run: |
+          # 1. Obtener el nombre del proyecto exacto de Synology
           PROJECT_NAME=$(docker inspect -f '{{ index .Config.Labels "com.docker.compose.project" }}' eepsa-db)
           echo "Deploying to project: $PROJECT_NAME"
-          docker-compose -p $PROJECT_NAME up -d --build frontend backend db
+          
+          # 2. Descubrir la ruta absoluta real del Synology (ej. /volume1/docker/CatalogoEepsa)
+          FRONTEND_MOUNT=$(docker inspect -f '{{ range .Mounts }}{{ if eq .Destination "/app" }}{{ .Source }}{{ end }}{{ end }}' eepsa-frontend)
+          HOST_DIR=$(dirname "$FRONTEND_MOUNT")
+          echo "Host project dir: $HOST_DIR"
+          
+          # 3. Forzar a docker-compose a usar la ruta del host para los volúmenes
+          export COMPOSE_PROJECT_DIR=$HOST_DIR
+          docker-compose -p $PROJECT_NAME up -d --build frontend backend
