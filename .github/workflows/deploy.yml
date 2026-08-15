@@ -20,8 +20,8 @@ jobs:
           echo "Deploying to project: $PROJECT_NAME"
           
           # 2. Descubrir la ruta absoluta real del Synology (ej. /volume1/docker/CatalogoEepsa)
-          FRONTEND_MOUNT=$(docker inspect -f '{{ range .Mounts }}{{ if eq .Destination "/app" }}{{ .Source }}{{ end }}{{ end }}' eepsa-frontend)
-          HOST_DIR=$(dirname "$FRONTEND_MOUNT")
+          RUNNER_MOUNT=$(docker inspect -f '{{ range .Mounts }}{{ if eq .Destination "/opt/actions-runner/_work/CatalogoEepsa/CatalogoEepsa" }}{{ .Source }}{{ end }}{{ end }}' eepsa-github-runner)
+          HOST_DIR=$RUNNER_MOUNT
           echo "Host project dir: $HOST_DIR"
           
           # 3. Forzar a docker-compose a usar la ruta absoluta del host para los volúmenes
