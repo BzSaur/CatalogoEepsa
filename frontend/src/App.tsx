@@ -524,7 +524,7 @@ function Screen2AAssistant() {
         >
           <div className="flex flex-col gap-2.5">
             <AnimatePresence initial={false}>
-              {messages.map((msg, idx) => {
+              {messages.map((msg) => {
                 const timeStr = new Date(msg.id).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 return (
                   <div key={msg.id} className="flex flex-col w-full">
@@ -822,7 +822,7 @@ function Screen2BCatalog() {
                  transition={{ duration: 0.25 }}
                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                >
-                  {filtered.map((p, idx) => (
+                  {filtered.map((p) => (
                      <div 
                         key={p.id} 
                         className="bg-white rounded-3xl border border-gray-100 premium-shadow hover:shadow-[0_20px_40px_-15px_rgba(15,118,110,0.15)] transition-all duration-300 overflow-hidden flex flex-col group"
