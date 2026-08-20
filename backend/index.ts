@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // Servir la carpeta de imágenes estáticas (volumen montado del NAS)
-app.use('/static/img', express.static('/app/public/img'));
+app.use('/catalogo-media', express.static('/app/public/img'));
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL
