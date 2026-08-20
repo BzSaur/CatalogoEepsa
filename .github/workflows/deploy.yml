@@ -27,10 +27,10 @@ jobs:
           # 3. Forzar a docker-compose a usar la ruta absoluta del host para los volúmenes
           export HOST_PATH=$HOST_DIR
           
-          # 4. Copiar las imágenes al directorio host para el volumen
-          mkdir -p $HOST_DIR/assets
-          cp -r assets/img $HOST_DIR/assets/
-          
           docker-compose -p $PROJECT_NAME up -d --build frontend backend
+          
+          # 4. Copiar las imágenes a través de Docker hacia el volumen del host
+          docker cp assets/img/. eepsa-backend:/app/public/img/
+          
           # Ejecutar actualizacion de rutas de imagenes
           docker exec -i eepsa-db psql -U eepsa_user -d eepsa_catalog < db/update_prod.sql || true
